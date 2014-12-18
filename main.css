@@ -1,0 +1,41 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body, #application, .container, .column {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.column {
+    float: left;
+    background: #eee;
+    border-left: 1px solid white;
+    text-align: center;
+}
+.column-first {
+    width: 25%;
+}
+.column-second {
+    width: 42%;
+}
+.column-third {
+    width: 33%;
+}
+
+.row {
+    border-bottom: 1px solid white;
+}
+.row-map {
+    height: 50%;
+}
+.row-persons {
+    height: 50%;
+}
+.row-cloud {
+    height: 30%;
+}
+.row-wiki {
+    height: 70%;
+}

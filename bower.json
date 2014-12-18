@@ -1,0 +1,8 @@
+{
+  "name": "graph-zhe",
+  "private": true,
+  "dependencies": {
+    "react": "~0.12.1",
+    "fontawesome": "~4.2.0"
+  }
+}
