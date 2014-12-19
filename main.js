@@ -156,6 +156,40 @@
                     // todo
                 }
             });
+
+            var renderedTitles = [];
+            var titles = events.sort(function (a, b) {
+                if (a.importance === b.importance) {
+                    return 0;
+                } else if (a.importance > b.importance) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }).filter(function (event) {
+                var newTop = getPxForDate(event.date);
+                if (newTop + 20 >= pxSize) {
+                    return false;
+                }
+                if (renderedTitles.some(function (top) {
+                        return newTop - 20 <= top && top <= newTop + 20;
+                    })) {
+                    return false;
+                }
+                renderedTitles.push(newTop);
+                return true;
+            }).map(function (event) {
+                return h('div', {
+                    className: 'event-title',
+                    style: {
+                        top: getPxForDate(event.date),
+                        borderTopWidth: Timeline.getLineHeightByImportance(event.importance),
+                        borderColor: Timeline.getEventColorByImportance(event.importance)
+                    }
+                }, event.title);
+            });
+
+
             return h('div', {
                     className: 'timeline'
                 },
@@ -164,7 +198,7 @@
                 }, lines),
                 h('div', {
                     className: 'timeline-titles'
-                }, 'titles')
+                }, titles)
             );
         }
     });

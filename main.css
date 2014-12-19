@@ -13,7 +13,6 @@ html, body, #application, .container, .column {
     float: left;
     background: #eee;
     border-left: 1px solid white;
-    text-align: center;
 }
 .column-first {
     width: 25%;
@@ -51,6 +50,7 @@ html, body, #application, .container, .column {
     position: relative;
 }
 .timeline-titles {
+    position: relative;
     height: 100%;
     width: 75%;
     float: left;
@@ -60,4 +60,10 @@ html, body, #application, .container, .column {
 }
 .event-once-line {
     width: 100%;
+}
+.event-title {
+    position: absolute;
+    height: 20px;
+    width: 100%;
+    border: 0px solid black;
 }
