@@ -3,6 +3,8 @@
   "private": true,
   "dependencies": {
     "react": "~0.12.1",
-    "fontawesome": "~4.2.0"
+    "fontawesome": "~4.2.0",
+    "moment": "~2.8.4",
+    "lodash": "~2.4.1"
   }
 }

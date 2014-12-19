@@ -6,6 +6,7 @@ html, body, #application, .container, .column {
     height: 100%;
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 .column {
@@ -38,4 +39,25 @@ html, body, #application, .container, .column {
 }
 .row-wiki {
     height: 70%;
+}
+
+.timeline {
+    height: 100%;
+}
+.timeline-scale {
+    height: 100%;
+    width: 25%;
+    float: left;
+    position: relative;
+}
+.timeline-titles {
+    height: 100%;
+    width: 75%;
+    float: left;
+}
+.event {
+    position: absolute;
+}
+.event-once-line {
+    width: 100%;
 }
