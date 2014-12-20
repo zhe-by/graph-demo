@@ -1,4 +1,11 @@
 {
+    "globals": {
+        "React": true,
+        "_": true,
+        "moment": true,
+        "h": true,
+        "zhe": true
+    },
     "bitwise": true,
     "camelcase": true,
     "curly": true,
@@ -10,7 +17,6 @@
     "nonew": true,
     "quotmark": "single",
     "undef": true,
-    "strict": true,
     "eqnull": true,
     "scripturl": true,
     "devel": true,
