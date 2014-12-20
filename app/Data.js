@@ -70,12 +70,12 @@
         };
     }());
 
-    _.reduce(_.times(100), function (year, i) {
+    _.reduce(_.times(500), function (year, i) {
         zhe.graph.addFact('eventOnce', 'Тест', null, null, {
             importance: Math.ceil(Math.random() * 100),
             date: moment([year]).unix()
         });
-        return year + (Math.ceil(Math.random() * 25));
+        return year + (Math.ceil(Math.random() * 5));
     }, 800);
 
     zhe.graph.addFact('eventOnce', 'Тест', null, null, {

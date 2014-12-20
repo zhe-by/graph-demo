@@ -14,8 +14,8 @@
                                 height: zhe.Timeline.getLineHeightByImportance(event.importance),
                                 top: this.props.getPxForDate(event.date),
                                 backgroundColor: zhe.Timeline.getEventColorByImportance(event.importance)
-                            },
-                            onMouseOver: this.props.onHoverLine.bind(null, events.indexOf(event))
+                            }
+                            // onMouseOver: this.props.onHoverLine.bind(null, events.indexOf(event))
                         });
                     } else if (event.type === 'eventLong') {
                         // todo
@@ -25,8 +25,40 @@
                 }.bind(this))
                 .valueOf();
             return h('div', {
-                className: 'timeline-scale'
+                className: 'timeline-scale',
+                onMouseMove: this.onHover,
+                onWheel: function (e) {
+                    var y = e.clientY;
+                    var hoveredIndex = _.reduce(this.props.events, function (result, event, i) {
+                        var lineY = this.props.getPxForDate(event.date);
+                        if (Math.abs(lineY - y) < result.min) {
+                            result.min = Math.abs(lineY - y);
+                            result.index = i;
+                        }
+                        return result;
+                    }.bind(this), {
+                        min: Infinity,
+                        index: -1
+                    }).index;
+
+                    this.props.onZoom(e.deltaY > 0 ? 1 : -1, this.props.events[hoveredIndex].date);
+                }.bind(this)
             }, lines);
+        },
+        onHover: function (e) {
+            var y = e.clientY;
+            var hoveredIndex = _.reduce(this.props.events, function (result, event, i) {
+                var lineY = this.props.getPxForDate(event.date);
+                if (Math.abs(lineY - y) < result.min) {
+                    result.min = Math.abs(lineY - y);
+                    result.index = i;
+                }
+                return result;
+            }.bind(this), {
+                min: Infinity,
+                index: -1
+            }).index;
+            this.props.onHoverLine(hoveredIndex);
         }
     });
 
@@ -148,7 +180,23 @@
                 h(TimelineScale, {
                     events: this.state.events,
                     getPxForDate: this.state.getPxForDate,
-                    onHoverLine: this.onHoverLine
+                    onHoverLine: this.onHoverLine,
+                    onZoom: function (zoom, zoomPosition) {
+                        var start = zoomPosition - (zoomPosition - this.state.start) * (zoom > 0 ? 1.1 : 0.9);
+                        var end = zoomPosition + (this.state.end - zoomPosition) * (zoom > 0 ? 1.1 : 0.9);
+
+                        this.setState({
+                            start: start,
+                            end: end,
+                            events: zhe.graph.getEventsInRange(start, end),
+                            getPxForDate: function (date) {
+                                var pxSize = this.getDOMNode().offsetHeight;
+                                var timeSize = this.state.end - this.state.start;
+                                var msPerPx = timeSize / pxSize;
+                                return (date - this.state.start) / msPerPx;
+                            }.bind(this)
+                        });
+                    }.bind(this)
                 }),
                 h('div', {
                         className: 'timeline-titles'
