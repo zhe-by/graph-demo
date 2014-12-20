@@ -1,4 +1,7 @@
+/*global React,_,moment*/
 (function () {
+    'use strict';
+
     var h = React.createElement;
 
     var facts = [];
@@ -72,12 +75,12 @@
         };
     }());
 
-    _.reduce(_.times(100), function (year, i) {
+    _.reduce(_.times(1000), function (year, i) {
         graph.addFact('eventOnce', 'Тест', null, null, {
-            importance: ~~(Math.random() * 100),
+            importance: Math.ceil(Math.random() * 100),
             date: moment([year]).unix()
         });
-        return year + (~~(Math.random() * 30));
+        return year + (Math.ceil(Math.random() * 4));
     }, 800);
 
     graph.addFact('eventOnce', 'Тест', null, null, {
@@ -93,23 +96,101 @@
         date: moment([1888]).unix()
     });
 
+    var TimelineScale = React.createClass({
+        mixins: [React.addons.PureRenderMixin],
+        render: function () {
+            var events = this.props.events;
+            var lines = _(events).sortBy(function (a, b) {
+                    if (a.importance === b.importance) {
+                        return 0;
+                    } else if (a.importance > b.importance) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }).map(function (event) {
+                    if (event.type === 'eventOnce') {
+                        return h('div', {
+                            className: 'event event-once-line',
+                            style: {
+                                height: Timeline.getLineHeightByImportance(event.importance),
+                                top: this.props.getPxForDate(event.date),
+                                backgroundColor: Timeline.getEventColorByImportance(event.importance)
+                            },
+                            onMouseOver: this.props._onMouseOver.bind(null, events.indexOf(event))
+                        });
+                    } else if (event.type === 'eventLong') {
+                        // todo
+                    } else if (event.type === 'eventApproximate') {
+                        // todo
+                    }
+                }.bind(this))
+                .valueOf();
+            return h('div', {
+                className: 'timeline-scale'
+            }, lines);
+        }
+    });
+
+    var TimelineTitles = React.createClass({
+        mixins: [React.addons.PureRenderMixin],
+        render: function () {
+            var renderedTitles = [];
+            var titles = _(this.props.events).sortBy(function (a, b) {
+                    if (a.importance === b.importance) {
+                        return 0;
+                    } else if (a.importance > b.importance) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }.bind(this)).filter(function (event) {
+                    var newTop = this.props.getPxForDate(event.date);
+                    if (newTop - Timeline.TITLE_SIZE <= 0) {
+                        return false;
+                    }
+                    if (renderedTitles.some(function (top) {
+                            return newTop - Timeline.TITLE_SIZE <= top && top <= newTop + Timeline.TITLE_SIZE;
+                        })) {
+                        return false;
+                    }
+                    renderedTitles.push(newTop);
+                    return true;
+                }.bind(this)).map(function (event) {
+                    return h('div', {
+                        className: 'event-title',
+                        style: {
+                            top: this.props.getPxForDate(event.date) - Timeline.TITLE_SIZE,
+                            borderBottomWidth: Timeline.getLineHeightByImportance(event.importance),
+                            borderColor: Timeline.getEventColorByImportance(event.importance)
+                        }
+                    }, event.title);
+                }.bind(this))
+                .valueOf();
+            return h('div', {
+                className: 'timeline-titles-statics'
+            }, titles);
+        }
+    });
+
     var Timeline = React.createClass({
         statics: {
+            TITLE_SIZE: 20,
             getEventColorByImportance: function (importance) {
                 if (importance > 90) {
-                    return 'red';
+                    return '#d9534f';
                 }
                 if (importance > 50) {
-                    return 'yellow';
+                    return '#f0ad4e';
                 }
-                return '#000';
+                return '#337ab7';
             },
             getLineHeightByImportance: function (importance) {
                 if (importance > 90) {
-                    return 5;
+                    return 3;
                 }
                 if (importance > 50) {
-                    return 3;
+                    return 2;
                 }
                 return 1;
             }
@@ -117,7 +198,15 @@
         getInitialState: function () {
             return {
                 start: moment([1000]).unix(),
-                end: moment([2000]).unix()
+                end: moment([2000]).unix(),
+                events: graph.getEventsInRange(
+                    moment([1000]).unix(), moment([2000]).unix()),
+                getPxForDate: function (date) {
+                    var pxSize = this.getDOMNode().offsetHeight;
+                    var timeSize = this.state.end - this.state.start;
+                    var msPerPx = timeSize / pxSize;
+                    return (date - this.state.start) / msPerPx;
+                }.bind(this)
             };
         },
         render: function () {
@@ -133,73 +222,50 @@
             var pxSize = this.getDOMNode().offsetHeight;
             var timeSize = this.state.end - this.state.start;
             var msPerPx = timeSize / pxSize;
-            var events = graph.getEventsInRange(
-                this.state.start, this.state.end);
+            var events = this.state.events;
+            var getPxForDate = this.state.getPxForDate;
 
-            var getPxForDate = function (date) {
-                return (date - this.state.start) / msPerPx;
-            }.bind(this);
-
-            var lines = events.map(function (event) {
-                if (event.type === 'eventOnce') {
-                    return h('div', {
-                        className: 'event event-once-line',
-                        style: {
-                            height: Timeline.getLineHeightByImportance(event.importance),
-                            top: getPxForDate(event.date),
-                            backgroundColor: Timeline.getEventColorByImportance(event.importance)
-                        }
-                    });
-                } else if (event.type === 'eventLong') {
-                    // todo
-                } else if (event.type === 'eventApproximate') {
-                    // todo
-                }
-            });
-
-            var renderedTitles = [];
-            var titles = events.sort(function (a, b) {
-                if (a.importance === b.importance) {
-                    return 0;
-                } else if (a.importance > b.importance) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }).filter(function (event) {
-                var newTop = getPxForDate(event.date);
-                if (newTop + 20 >= pxSize) {
-                    return false;
-                }
-                if (renderedTitles.some(function (top) {
-                        return newTop - 20 <= top && top <= newTop + 20;
-                    })) {
-                    return false;
-                }
-                renderedTitles.push(newTop);
-                return true;
-            }).map(function (event) {
-                return h('div', {
-                    className: 'event-title',
+            var titleOver;
+            if (this.state.over) {
+                var event = events[this.state.over];
+                titleOver = h('div', {
+                    className: 'event-title event-over',
                     style: {
-                        top: getPxForDate(event.date),
-                        borderTopWidth: Timeline.getLineHeightByImportance(event.importance),
+                        top: getPxForDate(event.date) - Timeline.TITLE_SIZE,
+                        borderBottomWidth: Timeline.getLineHeightByImportance(event.importance),
                         borderColor: Timeline.getEventColorByImportance(event.importance)
                     }
                 }, event.title);
-            });
-
+            }
 
             return h('div', {
                     className: 'timeline'
                 },
+                h(TimelineScale, {
+                    events: events,
+                    getPxForDate: getPxForDate,
+                    _onMouseOver: this._onMouseOver
+                }),
                 h('div', {
-                    className: 'timeline-scale'
-                }, lines),
-                h('div', {
-                    className: 'timeline-titles'
-                }, titles)
+                        className: 'timeline-titles'
+                    },
+                    h(TimelineTitles, {
+                        events: events,
+                        getPxForDate: getPxForDate
+                    }),
+
+                    !!titleOver && h('div', {
+                            className: 'event-over'
+                        },
+                        titleOver
+                    )
+                )
             );
+        },
+        _onMouseOver: function (i, e) {
+            this.setState({
+                over: i
+            });
         }
     });
     var Map = React.createClass({

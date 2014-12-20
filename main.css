@@ -8,6 +8,9 @@ html, body, #application, .container, .column {
     padding: 0;
     overflow: hidden;
 }
+body {
+    font-family: sans-serif;
+}
 
 .column {
     float: left;
@@ -62,8 +65,15 @@ html, body, #application, .container, .column {
     width: 100%;
 }
 .event-title {
+    box-sizing: content-box;
     position: absolute;
-    height: 20px;
+    height: 14px;
+    padding-top: 6px;
     width: 100%;
     border: 0px solid black;
+    padding-left: 15px;
+}
+.event-over {
+    background-color: #ddd;
+    z-index: 100;
 }
