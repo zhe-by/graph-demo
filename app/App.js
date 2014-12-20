@@ -4,8 +4,14 @@ zhe.App = React.createClass({
                 className: 'container'
             },
             h('div', {
-                className: 'column column-first'
-            }, h(zhe.Timeline)),
+                    className: 'column column-first'
+                },
+                h(zhe.Timeline, {
+                    onSelect: function () {
+                        // todo filter by event
+                    }
+                })
+            ),
             h('div', {
                     className: 'column column-second'
                 },

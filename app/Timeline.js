@@ -28,26 +28,17 @@
                 className: 'timeline-scale',
                 onMouseMove: this.onHover,
                 onWheel: function (e) {
-                    var y = e.clientY;
-                    var hoveredIndex = _.reduce(this.props.events, function (result, event, i) {
-                        var lineY = this.props.getPxForDate(event.date);
-                        if (Math.abs(lineY - y) < result.min) {
-                            result.min = Math.abs(lineY - y);
-                            result.index = i;
-                        }
-                        return result;
-                    }.bind(this), {
-                        min: Infinity,
-                        index: -1
-                    }).index;
-
+                    var hoveredIndex = this._findIndexClosest(e.clientY);
                     this.props.onZoom(e.deltaY > 0 ? 1 : -1, this.props.events[hoveredIndex].date);
+                }.bind(this),
+                onClick: function (e) {
+                    var hoveredIndex = this._findIndexClosest(e.clientY);
+                    this.props.onSelect(this.props.events[hoveredIndex]);
                 }.bind(this)
             }, lines);
         },
-        onHover: function (e) {
-            var y = e.clientY;
-            var hoveredIndex = _.reduce(this.props.events, function (result, event, i) {
+        _findIndexClosest: function (y) {
+            return _.reduce(this.props.events, function (result, event, i) {
                 var lineY = this.props.getPxForDate(event.date);
                 if (Math.abs(lineY - y) < result.min) {
                     result.min = Math.abs(lineY - y);
@@ -58,6 +49,9 @@
                 min: Infinity,
                 index: -1
             }).index;
+        },
+        onHover: function (e) {
+            var hoveredIndex = this._findIndexClosest(e.clientY);
             this.props.onHoverLine(hoveredIndex);
         }
     });
@@ -196,7 +190,8 @@
                                 return (date - this.state.start) / msPerPx;
                             }.bind(this)
                         });
-                    }.bind(this)
+                    }.bind(this),
+                    onSelect: this.props.onSelect
                 }),
                 h('div', {
                         className: 'timeline-titles'
