@@ -4,15 +4,9 @@
         mixins: [React.addons.PureRenderMixin],
         render: function () {
             var events = this.props.events;
-            var lines = _(events).sortBy(function (a, b) {
-                    if (a.importance === b.importance) {
-                        return 0;
-                    } else if (a.importance > b.importance) {
-                        return 1;
-                    } else {
-                        return -1;
-                    }
-                }).map(function (event) {
+            var lines = _(events)
+                .sortBy('importance')
+                .map(function (event) {
                     if (event.type === 'eventOnce') {
                         return h('div', {
                             className: 'event event-once-line',
@@ -21,7 +15,7 @@
                                 top: this.props.getPxForDate(event.date),
                                 backgroundColor: zhe.Timeline.getEventColorByImportance(event.importance)
                             },
-                            onMouseOver: this.props._onMouseOver.bind(null, events.indexOf(event))
+                            onMouseOver: this.props.onHoverLine.bind(null, events.indexOf(event))
                         });
                     } else if (event.type === 'eventLong') {
                         // todo
@@ -40,31 +34,29 @@
         mixins: [React.addons.PureRenderMixin],
         render: function () {
             var renderedTitles = [];
-            var titles = _(this.props.events).sortBy(function (a, b) {
-                    if (a.importance === b.importance) {
-                        return 0;
-                    } else if (a.importance > b.importance) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
-                }.bind(this)).filter(function (event) {
+            var titles = _(this.props.events)
+                .sortBy(function (event) {
+                    return -event.importance;
+                })
+                .filter(function (event) {
                     var newTop = this.props.getPxForDate(event.date);
-                    if (newTop - zhe.Timeline.TITLE_SIZE <= 0) {
+                    if (newTop - this.props.titleSize <= 0) {
                         return false;
                     }
-                    if (renderedTitles.some(function (top) {
-                            return newTop - zhe.Timeline.TITLE_SIZE <= top && top <= newTop + zhe.Timeline.TITLE_SIZE;
-                        })) {
+                    var isPlaceUsed = _.some(renderedTitles, function (top) {
+                        return newTop - this.props.titleSize <= top && top <= newTop + this.props.titleSize;
+                    }.bind(this));
+                    if (isPlaceUsed) {
                         return false;
                     }
                     renderedTitles.push(newTop);
                     return true;
-                }.bind(this)).map(function (event) {
+                }.bind(this))
+                .map(function (event) {
                     return h('div', {
                         className: 'event-title',
                         style: {
-                            top: this.props.getPxForDate(event.date) - zhe.Timeline.TITLE_SIZE,
+                            top: this.props.getPxForDate(event.date) - this.props.titleSize,
                             borderBottomWidth: zhe.Timeline.getLineHeightByImportance(event.importance),
                             borderColor: zhe.Timeline.getEventColorByImportance(event.importance)
                         }
@@ -77,9 +69,31 @@
         }
     });
 
+    var TimelineOver = React.createClass({
+        mixins: [React.addons.PureRenderMixin],
+        render: function () {
+            var titleOver = h('div', {
+                    className: 'event-title event-over',
+                    style: {
+                        top: this.props.getPxForDate(this.props.event.date) - this.props.titleSize,
+                        borderBottomWidth: zhe.Timeline.getLineHeightByImportance(this.props.event.importance),
+                        borderColor: zhe.Timeline.getEventColorByImportance(this.props.event.importance)
+                    }
+                },
+                h('span', null, moment.unix(this.props.event.date).year()),
+                h('span', null, ' ' + this.props.event.title)
+            );
+
+            return h('div', {
+                    className: 'event-over'
+                },
+                titleOver
+            );
+        }
+    });
+
     zhe.Timeline = React.createClass({
         statics: {
-            TITLE_SIZE: 20,
             getEventColorByImportance: function (importance) {
                 if (importance > 90) {
                     return '#d9534f';
@@ -98,6 +112,11 @@
                 }
                 return 1;
             }
+        },
+        getDefaultProps: function () {
+            return {
+                titleSize: 20
+            };
         },
         getInitialState: function () {
             return {
@@ -118,55 +137,37 @@
                 setTimeout(function () {
                     this.forceUpdate();
                 }.bind(this), 0);
-                // todo set this div to full height
                 return h('div', {
                     className: 'timeline'
                 });
-            }
-            var pxSize = this.getDOMNode().offsetHeight;
-            var timeSize = this.state.end - this.state.start;
-            var msPerPx = timeSize / pxSize;
-            var events = this.state.events;
-            var getPxForDate = this.state.getPxForDate;
-
-            var titleOver;
-            if (this.state.over) {
-                var event = events[this.state.over];
-                titleOver = h('div', {
-                    className: 'event-title event-over',
-                    style: {
-                        top: getPxForDate(event.date) - zhe.Timeline.TITLE_SIZE,
-                        borderBottomWidth: zhe.Timeline.getLineHeightByImportance(event.importance),
-                        borderColor: zhe.Timeline.getEventColorByImportance(event.importance)
-                    }
-                }, event.title);
             }
 
             return h('div', {
                     className: 'timeline'
                 },
                 h(TimelineScale, {
-                    events: events,
-                    getPxForDate: getPxForDate,
-                    _onMouseOver: this._onMouseOver
+                    events: this.state.events,
+                    getPxForDate: this.state.getPxForDate,
+                    onHoverLine: this.onHoverLine
                 }),
                 h('div', {
                         className: 'timeline-titles'
                     },
                     h(TimelineTitles, {
-                        events: events,
-                        getPxForDate: getPxForDate
+                        events: this.state.events,
+                        getPxForDate: this.state.getPxForDate,
+                        titleSize: this.props.titleSize
                     }),
 
-                    !!titleOver && h('div', {
-                            className: 'event-over'
-                        },
-                        titleOver
-                    )
+                    !!this.state.over && h(TimelineOver, {
+                        event: this.state.events[this.state.over],
+                        getPxForDate: this.state.getPxForDate,
+                        titleSize: this.props.titleSize
+                    })
                 )
             );
         },
-        _onMouseOver: function (i, e) {
+        onHoverLine: function (i, e) {
             this.setState({
                 over: i
             });

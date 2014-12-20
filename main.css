@@ -65,10 +65,11 @@ body {
     width: 100%;
 }
 .event-title {
+    font-size: 12px;
     box-sizing: content-box;
     position: absolute;
-    height: 14px;
-    padding-top: 6px;
+    height: 11px;
+    padding-top: 9px;
     width: 100%;
     border: 0px solid black;
     padding-left: 15px;
