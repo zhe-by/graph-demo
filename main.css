@@ -58,6 +58,9 @@ body {
     width: 75%;
     float: left;
 }
+.timeline-titles-statics {
+    height: 100%;
+}
 .event {
     position: absolute;
 }
@@ -74,7 +77,16 @@ body {
     border: 0px solid black;
     padding-left: 15px;
 }
+.event-over-container {
+    height: 100%;
+}
 .event-over {
     background-color: #ddd;
     z-index: 100;
+}
+.timeline-scale-zoom {
+    position: absolute;
+    background-color: #000;
+    opacity: .5;
+    width: 100%;
 }
