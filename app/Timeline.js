@@ -327,31 +327,6 @@ define(function (require) {
         }
     });
 
-    var TimelineScrollLines = React.createClass({
-        displayName: 'TimelineScrollLines',
-        mixins: [
-            React.addons.PureRenderMixin,
-            PxDateMixin
-        ],
-        propTypes: {
-            start: t.number.isRequired,
-            end: t.number.isRequired,
-            events: t.array.isRequired,
-            onBoundsChange: t.func.isRequired
-        },
-        render: function () {
-            if (!this.isMounted()) {
-                setTimeout(this.forceUpdate.bind(this), 0);
-                return h('div', {
-                    className: 'timeline-scroll' // todo
-                });
-            }
-            return h('div', {
-
-            });
-        }
-    });
-
     var TimelineScrollHandler = React.createClass({
         displayName: 'TimelineScrollHandler',
         mixins: [
@@ -428,7 +403,6 @@ define(function (require) {
             PxDateMixin
         ],
         propTypes: {
-            events: t.array.isRequired,
             startScroll: t.number.isRequired,
             endScroll: t.number.isRequired,
             start: t.number.isRequired,
@@ -440,11 +414,6 @@ define(function (require) {
                     className: 'timeline-scroll',
                     onMouseDown: this.onMouseDown
                 },
-                h(TimelineScrollLines, {
-                    start: this.props.start,
-                    end: this.props.end,
-                    events: this.props.events
-                }),
                 h(TimelineScrollHandler, {
                     startScroll: this.props.startScroll,
                     endScroll: this.props.endScroll,
@@ -589,7 +558,6 @@ define(function (require) {
                     })
                 ),
                 h(TimelineScroll, {
-                    events: this.props.events,
                     startScroll: this.state.start,
                     endScroll: this.state.end,
                     start: this.props.events[0].date,
