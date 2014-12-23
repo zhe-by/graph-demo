@@ -3,7 +3,7 @@
     var PxDateMixin = {
         getPxForDate: function (date) {
             return (function (sizePx, start, end, date) {
-                return (date - start) / (end - start) * sizePx;
+                return Math.ceil((date - start) / (end - start) * sizePx);
             }(this.getDOMNode().offsetHeight,
                 this.props.start,
                 this.props.end,
@@ -20,6 +20,7 @@
     };
 
     var TimelineScale = React.createClass({
+        displayName: 'TimelineScale',
         mixins: [
             React.addons.PureRenderMixin,
             PxDateMixin
@@ -42,7 +43,8 @@
                             style: {
                                 height: zhe.Timeline.getLineHeightByImportance(event.importance),
                                 top: this.getPxForDate(event.date),
-                                backgroundColor: zhe.Timeline.getEventColorByImportance(event.importance)
+                                backgroundColor: zhe.Timeline.getEventColorByImportance(event.importance),
+                                opacity: zhe.Timeline.getLineOpacityByImportance(event.importance)
                             }
                         });
                     } else if (event.type === 'eventLong') {
@@ -101,6 +103,7 @@
     });
 
     var TimelineRangeSelect = React.createClass({
+        displayName: 'TimelineRangeSelect',
         mixins: [
             React.addons.PureRenderMixin,
             PxDateMixin
@@ -175,6 +178,7 @@
     });
 
     var TimelineTitles = React.createClass({
+        displayName: 'TimelineTitles',
         mixins: [
             React.addons.PureRenderMixin,
             PxDateMixin
@@ -213,7 +217,8 @@
                         style: {
                             top: this.getPxForDate(event.date) - this.props.titleSize,
                             borderBottomWidth: zhe.Timeline.getLineHeightByImportance(event.importance),
-                            borderColor: zhe.Timeline.getEventColorByImportance(event.importance)
+                            borderColor: zhe.Timeline.getEventColorByImportance(event.importance),
+                            opacity: zhe.Timeline.getLineOpacityByImportance(event.importance)
                         }
                     }, event.title);
                 }.bind(this))
@@ -225,6 +230,7 @@
     });
 
     var TimelineOver = React.createClass({
+        displayName: 'TimelineOver',
         mixins: [
             React.addons.PureRenderMixin,
             PxDateMixin
@@ -258,6 +264,8 @@
     });
 
     zhe.Timeline = React.createClass({
+        displayName: 'Timeline',
+        mixins: [React.addons.PureRenderMixin],
         statics: {
             getEventColorByImportance: function (importance) {
                 if (importance > 90) {
@@ -276,6 +284,12 @@
                     return 2;
                 }
                 return 1;
+            },
+            getLineOpacityByImportance: function (importance) {
+                if (importance > 30) {
+                    return 1;
+                }
+                return Math.ceil((importance / 30 * 0.7 + 0.3) * 100) / 100;
             }
         },
         getDefaultProps: function () {
