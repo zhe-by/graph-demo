@@ -370,6 +370,9 @@ define(function (require) {
                     className: 'timeline-scroll' // todo
                 });
             }
+            return h('div', {
+                className: 'timeline-scroll' // todo
+            });
         }
     });
 
@@ -388,8 +391,20 @@ define(function (require) {
         },
         render: function () {
             return h('div', {
-                className: 'timeline-scroll'
-            });
+                    className: 'timeline-scroll'
+                },
+                h(TimelineScrollLines, {
+                    start: this.props.start,
+                    end: this.props.end,
+                    events: this.props.events
+                }),
+                h(TimelineScrollHandler, {
+                    startScroll: this.props.startScroll,
+                    endScroll: this.props.endScroll,
+                    start: this.props.start,
+                    end: this.props.end
+                })
+            );
         }
     });
 
@@ -459,7 +474,7 @@ define(function (require) {
             return {
                 start: start,
                 end: end,
-                events: Timeline.getEventsInRange(
+                eventsVisible: Timeline.getEventsInRange(
                     this.props.events, start, end)
             };
         },
@@ -468,7 +483,7 @@ define(function (require) {
                     className: 'timeline'
                 },
                 h(TimelineScale, {
-                    events: this.state.events,
+                    events: this.state.eventsVisible,
                     start: this.state.start,
                     end: this.state.end,
                     onHoverLine: this.onHoverLine,
@@ -479,7 +494,7 @@ define(function (require) {
                         className: 'timeline-titles'
                     },
                     h(TimelineTitles, {
-                        events: this.state.events,
+                        events: this.state.eventsVisible,
                         titleSize: this.props.titleSize,
                         start: this.state.start,
                         end: this.state.end,
@@ -493,7 +508,13 @@ define(function (require) {
                         titleSize: this.props.titleSize
                     })
                 ),
-                h(TimelineScroll)
+                h(TimelineScroll, {
+                    events: this.props.events,
+                    startScroll: this.state.start,
+                    endScroll: this.state.end,
+                    start: this.props.events[0].date,
+                    end: this.props.events[this.props.events.length - 1].date
+                })
             );
         },
         onHoverLine: function (eventHovered) {
@@ -505,7 +526,7 @@ define(function (require) {
             this.setState({
                 start: start,
                 end: end,
-                events: Timeline.getEventsInRange(
+                eventsVisible: Timeline.getEventsInRange(
                     this.props.events, start, end)
             });
         }
