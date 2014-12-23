@@ -29,7 +29,7 @@ define(function (require) {
             events: t.array.isRequired,
             start: t.number.isRequired,
             end: t.number.isRequired,
-            onZoom: t.func.isRequired,
+            onBoundsChange: t.func.isRequired,
             onHoverLine: t.func.isRequired,
             onSelect: t.func.isRequired
         },
@@ -70,7 +70,7 @@ define(function (require) {
                 },
                 h('div', null, lines),
                 h(TimelineRangeSelect, {
-                    onZoom: this.props.onZoom,
+                    onBoundsChange: this.props.onBoundsChange,
                     start: this.props.start,
                     end: this.props.end
                 })
@@ -102,7 +102,7 @@ define(function (require) {
             var start = hovered.date - (hovered.date - this.props.start) * (e.deltaY > 0 ? 1.2 : 0.8);
             var end = hovered.date + (this.props.end - hovered.date) * (e.deltaY > 0 ? 1.2 : 0.8);
 
-            this.props.onZoom(start, end);
+            this.props.onBoundsChange(start, end);
         },
         onClick: function (e) {
             var hovered = this.findClosest(e.clientY).value;
@@ -119,7 +119,7 @@ define(function (require) {
         propTypes: {
             start: t.number.isRequired,
             end: t.number.isRequired,
-            onZoom: t.func.isRequired
+            onBoundsChange: t.func.isRequired
         },
         getInitialState: function () {
             return {
@@ -176,7 +176,7 @@ define(function (require) {
                 document.body.classList.remove('noselect');
                 var endPos = e.clientY;
                 if (Math.abs(startPos - endPos) > MIN_ZOOM) {
-                    this.props.onZoom(this.state.newStart, this.state.newEnd);
+                    this.props.onBoundsChange(this.state.newStart, this.state.newEnd);
                 }
                 this.setState({
                     newStart: null,
@@ -256,7 +256,7 @@ define(function (require) {
         },
         onWheel: function (e) {
             var delta = (this.props.end - this.props.start) / 10;
-            this.props.onZoom(this.props.start + (e.deltaY > 0 ? delta : -delta), this.props.end + (e.deltaY > 0 ? delta : -delta));
+            this.props.onBoundsChange(this.props.start + (e.deltaY > 0 ? delta : -delta), this.props.end + (e.deltaY > 0 ? delta : -delta));
         },
         onMouseDown: function (e) {
             var startPos = e.clientY;
@@ -268,7 +268,7 @@ define(function (require) {
                     var deltaPx = startPos - newPos;
                     var heightPx = this.getDOMNode().offsetHeight;
                     var delta = deltaPx / heightPx * (this.props.end - this.props.start);
-                    this.props.onZoom(this.props.start + delta, this.props.end + delta);
+                    this.props.onBoundsChange(this.props.start + delta, this.props.end + delta);
                     startPos = newPos;
                 }
             }.bind(this);
@@ -336,7 +336,8 @@ define(function (require) {
         propTypes: {
             start: t.number.isRequired,
             end: t.number.isRequired,
-            events: t.array.isRequired
+            events: t.array.isRequired,
+            onBoundsChange: t.func.isRequired
         },
         render: function () {
             if (!this.isMounted()) {
@@ -367,12 +368,56 @@ define(function (require) {
             if (!this.isMounted()) {
                 setTimeout(this.forceUpdate.bind(this), 0);
                 return h('div', {
-                    className: 'timeline-scroll' // todo
+                    className: 'timeline-scroll-handler-container'
                 });
             }
             return h('div', {
-                className: 'timeline-scroll' // todo
-            });
+                    className: 'timeline-scroll-handler-container',
+                    onWheel: this.onWheel
+                },
+                h('div', {
+                    className: 'timeline-scroll-handler',
+                    style: (function () {
+                        var topPx = this.getPxForDate(this.props.startScroll);
+                        var heightPx = this.getPxForDate(this.props.endScroll) - topPx;
+                        return {
+                            top: topPx,
+                            height: heightPx
+                        };
+                    }.call(this)),
+                    onMouseDown: this.onMouseDown
+                })
+            );
+        },
+        onWheel: function (e) {
+            var delta = (this.props.endScroll - this.props.startScroll) / 2;
+            this.props.onBoundsChange(this.props.startScroll + (e.deltaY > 0 ? delta : -delta), this.props.endScroll + (e.deltaY > 0 ? delta : -delta));
+        },
+        onMouseDown: function (e) {
+            e.stopPropagation();
+            var startPos = e.clientY;
+            var MIN_MOVE = 3;
+
+            var move = function (e) {
+                var newPos = e.clientY;
+                if (Math.abs(startPos - newPos) > MIN_MOVE) {
+                    var deltaPx = startPos - newPos;
+                    var heightPx = this.getDOMNode().offsetHeight;
+                    var delta = deltaPx / heightPx * (this.props.end - this.props.start);
+                    this.props.onBoundsChange(this.props.startScroll - delta, this.props.endScroll - delta);
+                    startPos = newPos;
+                }
+            }.bind(this);
+
+            var end = function (e) {
+                document.body.removeEventListener('mouseup', end);
+                document.body.removeEventListener('mousemove', move);
+                document.body.classList.remove('noselect');
+            };
+
+            document.body.addEventListener('mouseup', end);
+            document.body.addEventListener('mousemove', move);
+            document.body.classList.add('noselect');
         }
     });
 
@@ -387,11 +432,13 @@ define(function (require) {
             startScroll: t.number.isRequired,
             endScroll: t.number.isRequired,
             start: t.number.isRequired,
-            end: t.number.isRequired
+            end: t.number.isRequired,
+            onBoundsChange: t.func.isRequired
         },
         render: function () {
             return h('div', {
-                    className: 'timeline-scroll'
+                    className: 'timeline-scroll',
+                    onMouseDown: this.onMouseDown
                 },
                 h(TimelineScrollLines, {
                     start: this.props.start,
@@ -402,9 +449,42 @@ define(function (require) {
                     startScroll: this.props.startScroll,
                     endScroll: this.props.endScroll,
                     start: this.props.start,
-                    end: this.props.end
+                    end: this.props.end,
+                    onBoundsChange: this.props.onBoundsChange
                 })
             );
+        },
+        onMouseDown: function (e) {
+            var down = true;
+            var newPosPx = e.clientY;
+            (function move(timeout) {
+                function up() {
+                    down = false;
+                }
+                if (!down) {
+                    document.body.removeEventListener('mouseup', up);
+                    return;
+                }
+                var newPos = this.getDateForPx(newPosPx);
+                var delta = Math.abs(this.props.endScroll - this.props.startScroll);
+                if (newPos < this.props.startScroll) {
+                    if (this.props.startScroll - delta < this.props.start) {
+                        delta = this.props.startScroll - this.props.start;
+                    }
+                    this.props.onBoundsChange(
+                        this.props.startScroll - delta,
+                        this.props.endScroll - delta);
+                } else if (newPos > this.props.endScroll) {
+                    if (this.props.endScroll + delta > this.props.end) {
+                        delta = this.props.end - this.props.endScroll;
+                    }
+                    this.props.onBoundsChange(
+                        this.props.startScroll + delta,
+                        this.props.endScroll + delta);
+                }
+                document.body.addEventListener('mouseup', up);
+                setTimeout(move.bind(this, timeout / 2), timeout);
+            }.call(this, 300));
         }
     });
 
@@ -487,7 +567,7 @@ define(function (require) {
                     start: this.state.start,
                     end: this.state.end,
                     onHoverLine: this.onHoverLine,
-                    onZoom: this.onZoom,
+                    onBoundsChange: this.onBoundsChange,
                     onSelect: this.props.onSelect
                 }),
                 h('div', {
@@ -498,7 +578,7 @@ define(function (require) {
                         titleSize: this.props.titleSize,
                         start: this.state.start,
                         end: this.state.end,
-                        onZoom: this.onZoom
+                        onBoundsChange: this.onBoundsChange
                     }),
 
                     !!this.state.over && h(TimelineOver, {
@@ -513,7 +593,8 @@ define(function (require) {
                     startScroll: this.state.start,
                     endScroll: this.state.end,
                     start: this.props.events[0].date,
-                    end: this.props.events[this.props.events.length - 1].date
+                    end: this.props.events[this.props.events.length - 1].date,
+                    onBoundsChange: this.onBoundsChange
                 })
             );
         },
@@ -522,7 +603,7 @@ define(function (require) {
                 over: eventHovered
             });
         },
-        onZoom: function (start, end) {
+        onBoundsChange: function (start, end) {
             this.setState({
                 start: start,
                 end: end,
