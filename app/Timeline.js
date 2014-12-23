@@ -212,15 +212,21 @@
                 }.bind(this))
                 .map(function (event) {
                     return h('div', {
-                        key: event.date + event.title,
-                        className: 'event-title',
-                        style: {
-                            top: this.getPxForDate(event.date) - this.props.titleSize,
-                            borderBottomWidth: zhe.Timeline.getLineHeightByImportance(event.importance),
-                            borderColor: zhe.Timeline.getEventColorByImportance(event.importance),
-                            opacity: zhe.Timeline.getLineOpacityByImportance(event.importance)
-                        }
-                    }, event.title);
+                            key: event.date + event.title,
+                            className: 'event-title',
+                            style: {
+                                top: this.getPxForDate(event.date) - this.props.titleSize,
+                                borderBottomWidth: zhe.Timeline.getLineHeightByImportance(event.importance),
+                                borderColor: zhe.Timeline.getEventColorByImportance(event.importance),
+                                opacity: zhe.Timeline.getLineOpacityByImportance(event.importance)
+                            }
+                        },
+                        h('span', {
+                                className: 'event-title-text'
+                            },
+                            event.title
+                        )
+                    );
                 }.bind(this))
                 .valueOf();
             return h('div', {
@@ -282,8 +288,12 @@
                         borderColor: zhe.Timeline.getEventColorByImportance(this.props.event.importance)
                     }
                 },
-                h('span', null, moment.unix(this.props.event.date).year()),
-                h('span', null, ' ' + this.props.event.title)
+                h('span', {
+                        className: 'event-title-text'
+                    },
+                    h('span', null, moment.unix(this.props.event.date).year()),
+                    h('span', null, ' ' + this.props.event.title)
+                )
             );
 
             return h('div', {
@@ -291,6 +301,25 @@
                 },
                 titleOver
             );
+        }
+    });
+
+    var TimelineScroll = React.createClass({
+        displayName: 'TimelineScroll',
+        mixins: [
+            React.addons.PureRenderMixin,
+            PxDateMixin
+        ],
+        render: function () {
+            if (!this.isMounted()) {
+                setTimeout(this.forceUpdate.bind(this), 0);
+                return h('div', {
+                    className: 'timeline-scroll'
+                });
+            }
+            return h('div', {
+                className: 'timeline-scroll'
+            });
         }
     });
 

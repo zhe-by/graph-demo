@@ -52,7 +52,7 @@
         }
 
         function getEventsInRange(start, end) {
-            return _.filter(zhe.facts, function (fact) {
+            var onlyEvents = _.filter(zhe.facts, function (fact) {
                 if (fact.type === 'eventOnce') {
                     return start <= fact.date && fact.date <= end;
                 } else if (fact.type === 'eventLong') {
@@ -61,6 +61,17 @@
                     // todo
                 }
             });
+            if (end - start > (moment([3000]).unix() - moment([0]).unix())) {
+                return _.filter(onlyEvents, function (event) {
+                    return event.importance > 70;
+                });
+            }
+            if (end - start > (moment([1000]).unix() - moment([0]).unix())) {
+                return _.filter(onlyEvents, function (event) {
+                    return event.importance > 50;
+                });
+            }
+            return onlyEvents;
         }
 
         return {
@@ -85,7 +96,7 @@
         'Старт космического корабля Союз ТМ-21'
     ];
 
-    _.reduce(_.times(500), function (year, i) {
+    _.reduce(_.times(5000), function (year, i) {
         zhe.graph.addFact('eventOnce', titles[Math.ceil(Math.random() * (titles.length - 1))], null, null, {
             importance: Math.ceil(Math.random() * 100),
             date: moment([year]).unix()

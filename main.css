@@ -85,8 +85,8 @@ body {
     font-size: 12px;
     box-sizing: content-box;
     position: absolute;
-    height: 11px;
-    padding-top: 29px;
+    height: 25px;
+    padding-top: 15px;
     width: 100%;
     border: 0px solid black;
     /*padding-left: 8px;*/
@@ -94,6 +94,11 @@ body {
 }
 .event-title:hover {
     background-color: #ddd;
+}
+.event-title-text {
+    position: absolute;
+    bottom: 0;
+    line-height: 10px;
 }
 .event-over-container {
     height: 100%;
