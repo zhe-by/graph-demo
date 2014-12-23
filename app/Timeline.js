@@ -1,4 +1,4 @@
-(function () {
+define(function (require) {
     'use strict';
     var PxDateMixin = {
         getPxForDate: function (date) {
@@ -48,10 +48,10 @@
                             key: event.date + event.title,
                             className: 'event event-once-line',
                             style: {
-                                height: zhe.Timeline.getLineHeightByImportance(event.importance),
+                                height: Timeline.getLineHeightByImportance(event.importance),
                                 top: this.getPxForDate(event.date),
-                                backgroundColor: zhe.Timeline.getEventColorByImportance(event.importance),
-                                opacity: zhe.Timeline.getLineOpacityByImportance(event.importance),
+                                backgroundColor: Timeline.getEventColorByImportance(event.importance),
+                                opacity: Timeline.getLineOpacityByImportance(event.importance),
                                 zIndex: event.importance
                             }
                         });
@@ -235,9 +235,9 @@
                             className: 'event-title',
                             style: {
                                 top: this.getPxForDate(event.date) - this.props.titleSize,
-                                borderBottomWidth: zhe.Timeline.getLineHeightByImportance(event.importance),
-                                borderColor: zhe.Timeline.getEventColorByImportance(event.importance),
-                                opacity: zhe.Timeline.getLineOpacityByImportance(event.importance)
+                                borderBottomWidth: Timeline.getLineHeightByImportance(event.importance),
+                                borderColor: Timeline.getEventColorByImportance(event.importance),
+                                opacity: Timeline.getLineOpacityByImportance(event.importance)
                             }
                         },
                         h('span', {
@@ -307,8 +307,8 @@
                     className: 'event-title event-over',
                     style: {
                         top: this.getPxForDate(this.props.event.date) - this.props.titleSize,
-                        borderBottomWidth: zhe.Timeline.getLineHeightByImportance(this.props.event.importance),
-                        borderColor: zhe.Timeline.getEventColorByImportance(this.props.event.importance)
+                        borderBottomWidth: Timeline.getLineHeightByImportance(this.props.event.importance),
+                        borderColor: Timeline.getEventColorByImportance(this.props.event.importance)
                     }
                 },
                 h('span', {
@@ -393,7 +393,7 @@
         }
     });
 
-    zhe.Timeline = React.createClass({
+    var Timeline = React.createClass({
         displayName: 'Timeline',
         mixins: [React.addons.PureRenderMixin],
         propTypes: {
@@ -459,7 +459,7 @@
             return {
                 start: start,
                 end: end,
-                events: zhe.Timeline.getEventsInRange(
+                events: Timeline.getEventsInRange(
                     this.props.events, start, end)
             };
         },
@@ -505,9 +505,10 @@
             this.setState({
                 start: start,
                 end: end,
-                events: zhe.Timeline.getEventsInRange(
+                events: Timeline.getEventsInRange(
                     this.props.events, start, end)
             });
         }
     });
-}());
+    return Timeline;
+});

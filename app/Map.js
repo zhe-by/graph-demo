@@ -1,9 +1,8 @@
-(function () {
+define(function (require) {
     'use strict';
-
-    zhe.Map = React.createClass({
+    return React.createClass({
         render: function () {
             return h('div', null, 'Map');
         }
     });
-}());
+});

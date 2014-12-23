@@ -1,11 +1,11 @@
 {
     "globals": {
+        "define": true,
         "React": true,
         "_": true,
         "moment": true,
         "h": true,
-        "t": true,
-        "zhe": true
+        "t": true
     },
     "bitwise": true,
     "camelcase": true,

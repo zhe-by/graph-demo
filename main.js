@@ -1,7 +1,8 @@
-(function () {
+define(function (require) {
     'use strict';
+    var App = require('app/App');
     React.render(
-        h(zhe.App),
+        h(App),
         document.getElementById('application')
     );
-}());
+});

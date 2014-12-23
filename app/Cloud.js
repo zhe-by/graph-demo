@@ -1,9 +1,9 @@
-(function () {
+define(function (require) {
     'use strict';
-
-    zhe.Cloud = React.createClass({
+    return React.createClass({
         render: function () {
             return h('div', null, 'Cloud');
         }
     });
-}());
+
+});
