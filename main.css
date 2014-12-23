@@ -27,13 +27,13 @@ body {
     border-left: 1px solid white;
 }
 .column-first {
-    width: 25%;
+    width: 30%;
 }
 .column-second {
-    width: 42%;
+    width: 40%;
 }
 .column-third {
-    width: 33%;
+    width: 30%;
 }
 
 .row {
@@ -57,7 +57,7 @@ body {
 }
 .timeline-scale {
     height: 100%;
-    width: 25%;
+    width: 20%;
     float: left;
     position: relative;
     cursor: pointer;
@@ -65,7 +65,7 @@ body {
 .timeline-titles {
     position: relative;
     height: 100%;
-    width: 75%;
+    width: 80%;
     float: left;
 }
 .timeline-titles-statics {
@@ -83,10 +83,10 @@ body {
     box-sizing: content-box;
     position: absolute;
     height: 11px;
-    padding-top: 9px;
+    padding-top: 29px;
     width: 100%;
     border: 0px solid black;
-    padding-left: 15px;
+    /*padding-left: 8px;*/
     /*transition: top .1s linear;*/
 }
 .event-over-container {

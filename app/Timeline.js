@@ -299,7 +299,7 @@
         },
         getDefaultProps: function () {
             return {
-                titleSize: 20
+                titleSize: 40
             };
         },
         getInitialState: function () {
