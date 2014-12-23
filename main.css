@@ -70,6 +70,7 @@ body {
 }
 .timeline-titles-statics {
     height: 100%;
+    cursor: move;
 }
 .event {
     position: absolute;
@@ -79,6 +80,8 @@ body {
     width: 100%;
 }
 .event-title {
+    transition: background-color .1s;
+    cursor: pointer;
     font-size: 12px;
     box-sizing: content-box;
     position: absolute;
@@ -88,6 +91,9 @@ body {
     border: 0px solid black;
     /*padding-left: 8px;*/
     /*transition: top .1s linear;*/
+}
+.event-title:hover {
+    background-color: #ddd;
 }
 .event-over-container {
     height: 100%;

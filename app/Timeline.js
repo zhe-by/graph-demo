@@ -225,12 +225,38 @@
                 .valueOf();
             return h('div', {
                 className: 'timeline-titles-statics',
-                onWheel: this.onWheel
+                onWheel: this.onWheel,
+                onMouseDown: this.onMouseDown
             }, titles);
         },
         onWheel: function (e) {
             var delta = (this.props.end - this.props.start) / 10;
             this.props.onZoom(this.props.start + (e.deltaY > 0 ? delta : -delta), this.props.end + (e.deltaY > 0 ? delta : -delta));
+        },
+        onMouseDown: function (e) {
+            var startPos = e.clientY;
+            var MIN_MOVE = 10;
+
+            var move = function (e) {
+                var newPos = e.clientY;
+                if (Math.abs(startPos - newPos) > MIN_MOVE) {
+                    var deltaPx = startPos - newPos;
+                    var heightPx = this.getDOMNode().offsetHeight;
+                    var delta = deltaPx / heightPx * (this.props.end - this.props.start);
+                    this.props.onZoom(this.props.start + delta, this.props.end + delta);
+                    startPos = newPos;
+                }
+            }.bind(this);
+
+            var end = function (e) {
+                document.body.removeEventListener('mouseup', end);
+                document.body.removeEventListener('mousemove', move);
+                document.body.classList.remove('noselect');
+            };
+
+            document.body.addEventListener('mouseup', end);
+            document.body.addEventListener('mousemove', move);
+            document.body.classList.add('noselect');
         }
     });
 
