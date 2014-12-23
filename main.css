@@ -117,4 +117,5 @@ body {
     background-color: #000;
     opacity: .5;
     width: 100%;
+    z-index: 200;
 }
