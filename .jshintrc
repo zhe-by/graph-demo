@@ -4,6 +4,7 @@
         "_": true,
         "moment": true,
         "h": true,
+        "t": true,
         "zhe": true
     },
     "bitwise": true,

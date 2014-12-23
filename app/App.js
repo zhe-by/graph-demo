@@ -9,7 +9,8 @@ zhe.App = React.createClass({
                 h(zhe.Timeline, {
                     onSelect: function () {
                         // todo filter by event
-                    }
+                    },
+                    events: zhe.graph.getEvents()
                 })
             ),
             h('div', {

@@ -25,6 +25,14 @@
             React.addons.PureRenderMixin,
             PxDateMixin
         ],
+        propTypes: {
+            events: t.array.isRequired,
+            start: t.number.isRequired,
+            end: t.number.isRequired,
+            onZoom: t.func.isRequired,
+            onHoverLine: t.func.isRequired,
+            onSelect: t.func.isRequired
+        },
         render: function () {
             if (!this.isMounted()) {
                 setTimeout(this.forceUpdate.bind(this), 0);
@@ -108,6 +116,11 @@
             React.addons.PureRenderMixin,
             PxDateMixin
         ],
+        propTypes: {
+            start: t.number.isRequired,
+            end: t.number.isRequired,
+            onZoom: t.func.isRequired
+        },
         getInitialState: function () {
             return {
                 newStart: null,
@@ -183,6 +196,12 @@
             React.addons.PureRenderMixin,
             PxDateMixin
         ],
+        propTypes: {
+            events: t.array.isRequired,
+            titleSize: t.number.isRequired,
+            start: t.number.isRequired,
+            end: t.number.isRequired
+        },
         render: function () {
             if (!this.isMounted()) {
                 setTimeout(this.forceUpdate.bind(this), 0);
@@ -272,6 +291,10 @@
             React.addons.PureRenderMixin,
             PxDateMixin
         ],
+        propTypes: {
+            event: t.object.isRequired,
+            titleSize: t.number.isRequired
+        },
         render: function () {
             if (!this.isMounted()) {
                 setTimeout(this.forceUpdate.bind(this), 0);
@@ -304,19 +327,66 @@
         }
     });
 
+    var TimelineScrollLines = React.createClass({
+        displayName: 'TimelineScrollLines',
+        mixins: [
+            React.addons.PureRenderMixin,
+            PxDateMixin
+        ],
+        propTypes: {
+            start: t.number.isRequired,
+            end: t.number.isRequired,
+            events: t.array.isRequired
+        },
+        render: function () {
+            if (!this.isMounted()) {
+                setTimeout(this.forceUpdate.bind(this), 0);
+                return h('div', {
+                    className: 'timeline-scroll' // todo
+                });
+            }
+            return h('div', {
+
+            });
+        }
+    });
+
+    var TimelineScrollHandler = React.createClass({
+        displayName: 'TimelineScrollHandler',
+        mixins: [
+            React.addons.PureRenderMixin,
+            PxDateMixin
+        ],
+        propTypes: {
+            startScroll: t.number.isRequired,
+            endScroll: t.number.isRequired,
+            start: t.number.isRequired,
+            end: t.number.isRequired
+        },
+        render: function () {
+            if (!this.isMounted()) {
+                setTimeout(this.forceUpdate.bind(this), 0);
+                return h('div', {
+                    className: 'timeline-scroll' // todo
+                });
+            }
+        }
+    });
+
     var TimelineScroll = React.createClass({
         displayName: 'TimelineScroll',
         mixins: [
             React.addons.PureRenderMixin,
             PxDateMixin
         ],
+        propTypes: {
+            events: t.array.isRequired,
+            startScroll: t.number.isRequired,
+            endScroll: t.number.isRequired,
+            start: t.number.isRequired,
+            end: t.number.isRequired
+        },
         render: function () {
-            if (!this.isMounted()) {
-                setTimeout(this.forceUpdate.bind(this), 0);
-                return h('div', {
-                    className: 'timeline-scroll'
-                });
-            }
             return h('div', {
                 className: 'timeline-scroll'
             });
@@ -326,6 +396,10 @@
     zhe.Timeline = React.createClass({
         displayName: 'Timeline',
         mixins: [React.addons.PureRenderMixin],
+        propTypes: {
+            onSelect: t.func.isRequired,
+            events: t.array.isRequired
+        },
         statics: {
             getEventColorByImportance: function (importance) {
                 if (importance > 90) {
@@ -350,6 +424,28 @@
                     return 1;
                 }
                 return Math.ceil((importance / 30 * 0.7 + 0.3) * 100) / 100;
+            },
+            getEventsInRange: function (events, start, end) {
+                var onlyEvents = _.filter(events, function (fact) {
+                    if (fact.type === 'eventOnce') {
+                        return start <= fact.date && fact.date <= end;
+                    } else if (fact.type === 'eventLong') {
+                        // todo
+                    } else if (fact.type === 'eventApproximate') {
+                        // todo
+                    }
+                });
+                if (end - start > (moment([3000]).unix() - moment([0]).unix())) {
+                    return _.filter(onlyEvents, function (event) {
+                        return event.importance > 70;
+                    });
+                }
+                if (end - start > (moment([1000]).unix() - moment([0]).unix())) {
+                    return _.filter(onlyEvents, function (event) {
+                        return event.importance > 50;
+                    });
+                }
+                return onlyEvents;
             }
         },
         getDefaultProps: function () {
@@ -363,7 +459,8 @@
             return {
                 start: start,
                 end: end,
-                events: zhe.graph.getEventsInRange(start, end)
+                events: zhe.Timeline.getEventsInRange(
+                    this.props.events, start, end)
             };
         },
         render: function () {
@@ -395,7 +492,8 @@
                         end: this.state.end,
                         titleSize: this.props.titleSize
                     })
-                )
+                ),
+                h(TimelineScroll)
             );
         },
         onHoverLine: function (eventHovered) {
@@ -407,7 +505,8 @@
             this.setState({
                 start: start,
                 end: end,
-                events: zhe.graph.getEventsInRange(start, end)
+                events: zhe.Timeline.getEventsInRange(
+                    this.props.events, start, end)
             });
         }
     });

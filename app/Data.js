@@ -74,10 +74,17 @@
             return onlyEvents;
         }
 
+        function getEvents() {
+            return _.filter(zhe.facts, function (fact) {
+                return fact.type === 'eventOnce';
+            });
+        }
+
         return {
             addFact: addFact,
             addEdge: addEdge,
-            getEventsInRange: getEventsInRange
+            getEventsInRange: getEventsInRange,
+            getEvents: getEvents
         };
     }());
 
