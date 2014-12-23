@@ -4,7 +4,7 @@
         getPxForDate: function (date) {
             return (function (sizePx, start, end, date) {
                 return Math.ceil((date - start) / (end - start) * sizePx);
-            }(this.getDOMNode().offsetHeight,
+            }(this.height || (this.height = this.getDOMNode().offsetHeight),
                 this.props.start,
                 this.props.end,
                 date));
@@ -12,7 +12,7 @@
         getDateForPx: function (px) {
             return (function (sizePx, start, end, px) {
                 return (px / sizePx) * (end - start) + start;
-            }(this.getDOMNode().offsetHeight,
+            }(this.height || (this.height = this.getDOMNode().offsetHeight),
                 this.props.start,
                 this.props.end,
                 px));
@@ -34,7 +34,6 @@
             }
 
             var lines = _(this.props.events)
-                .sortBy('importance')
                 .map(function (event) {
                     if (event.type === 'eventOnce') {
                         return h('div', {
@@ -44,7 +43,8 @@
                                 height: zhe.Timeline.getLineHeightByImportance(event.importance),
                                 top: this.getPxForDate(event.date),
                                 backgroundColor: zhe.Timeline.getEventColorByImportance(event.importance),
-                                opacity: zhe.Timeline.getLineOpacityByImportance(event.importance)
+                                opacity: zhe.Timeline.getLineOpacityByImportance(event.importance),
+                                zIndex: event.importance
                             }
                         });
                     } else if (event.type === 'eventLong') {
