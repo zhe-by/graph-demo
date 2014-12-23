@@ -224,8 +224,13 @@
                 }.bind(this))
                 .valueOf();
             return h('div', {
-                className: 'timeline-titles-statics'
+                className: 'timeline-titles-statics',
+                onWheel: this.onWheel
             }, titles);
+        },
+        onWheel: function (e) {
+            var delta = (this.props.end - this.props.start) / 10;
+            this.props.onZoom(this.props.start + (e.deltaY > 0 ? delta : -delta), this.props.end + (e.deltaY > 0 ? delta : -delta));
         }
     });
 
@@ -325,7 +330,8 @@
                         events: this.state.events,
                         titleSize: this.props.titleSize,
                         start: this.state.start,
-                        end: this.state.end
+                        end: this.state.end,
+                        onZoom: this.onZoom
                     }),
 
                     !!this.state.over && h(TimelineOver, {
