@@ -2,18 +2,20 @@
     'use strict';
     var PxDateMixin = {
         getPxForDate: function (date) {
-            return zhe.Timeline.getPxForDate(
-                this.getDOMNode().offsetHeight,
+            return (function (sizePx, start, end, date) {
+                return (date - start) / (end - start) * sizePx;
+            }(this.getDOMNode().offsetHeight,
                 this.props.start,
                 this.props.end,
-                date);
+                date));
         },
         getDateForPx: function (px) {
-            return zhe.Timeline.getDateForPx(
-                this.getDOMNode().offsetHeight,
+            return (function (sizePx, start, end, px) {
+                return (px / sizePx) * (end - start) + start;
+            }(this.getDOMNode().offsetHeight,
                 this.props.start,
                 this.props.end,
-                px);
+                px));
         }
     };
 
@@ -22,12 +24,6 @@
             React.addons.PureRenderMixin,
             PxDateMixin
         ],
-        getInitialState: function () {
-            return {
-                newStart: null,
-                newEnd: null
-            };
-        },
         render: function () {
             if (!this.isMounted()) {
                 setTimeout(this.forceUpdate.bind(this), 0);
@@ -36,13 +32,12 @@
                 });
             }
 
-            var events = this.props.events;
-
-            var lines = _(events)
+            var lines = _(this.props.events)
                 .sortBy('importance')
                 .map(function (event) {
                     if (event.type === 'eventOnce') {
                         return h('div', {
+                            key: event.date + event.title,
                             className: 'event event-once-line',
                             style: {
                                 height: zhe.Timeline.getLineHeightByImportance(event.importance),
@@ -57,56 +52,18 @@
                     }
                 }.bind(this))
                 .valueOf();
-            var zoom;
-            if (this.state.newStart) {
-                zoom = h('div', {
-                    className: 'timeline-scale-zoom',
-                    style: {
-                        top: this.getPxForDate(this.state.newStart),
-                        height: this.getPxForDate(this.state.newEnd) -
-                            this.getPxForDate(this.state.newStart)
-                    }
-                });
-            }
             return h('div', {
                     className: 'timeline-scale',
                     onMouseMove: this.onHover,
                     onWheel: this.onWheel,
-                    onClick: this.onClick,
-                    onMouseDown: function (e) {
-                        var startPos = e.clientY;
-                        var MIN_ZOOM = 50;
-
-                        var move = function (e) {
-                            var newPos = e.clientY;
-                            if (Math.abs(startPos - newPos) > MIN_ZOOM) {
-                                this.setState({
-                                    newStart: this.getDateForPx(startPos > newPos ? newPos : startPos),
-                                    newEnd: this.getDateForPx(startPos > newPos ? startPos : newPos)
-                                });
-                            }
-                        }.bind(this);
-
-                        var end = function (e) {
-                            document.body.removeEventListener('mouseup', end);
-                            document.body.removeEventListener('mousemove', move);
-                            var endPos = e.clientY;
-                            if (Math.abs(startPos - endPos) > MIN_ZOOM) {
-                                this.props.onZoom(this.state.newStart, this.state.newEnd);
-                            }
-                            this.setState({
-                                newStart: null,
-                                newEnd: null
-                            });
-                        }.bind(this);
-
-                        document.body.addEventListener('mouseup', end);
-                        document.body.addEventListener('mousemove', move);
-                    }.bind(this)
+                    onClick: this.onClick
                 },
                 h('div', null, lines),
-
-                !!this.state.newStart && zoom
+                h(TimelineRangeSelect, {
+                    onZoom: this.props.onZoom,
+                    start: this.props.start,
+                    end: this.props.end
+                })
             );
         },
         findClosest: function (y) {
@@ -131,16 +88,89 @@
         },
         onWheel: function (e) {
             var hovered = this.findClosest(e.clientY).value;
-            var zoom = e.deltaY > 0 ? 1 : -1;
 
-            var start = hovered.date - (hovered.date - this.props.start) * (zoom > 0 ? 1.1 : 0.9);
-            var end = hovered.date + (this.props.end - hovered.date) * (zoom > 0 ? 1.1 : 0.9);
+            var start = hovered.date - (hovered.date - this.props.start) * (e.deltaY > 0 ? 1.2 : 0.8);
+            var end = hovered.date + (this.props.end - hovered.date) * (e.deltaY > 0 ? 1.2 : 0.8);
 
             this.props.onZoom(start, end);
         },
         onClick: function (e) {
             var hovered = this.findClosest(e.clientY).value;
             this.props.onSelect(hovered);
+        }
+    });
+
+    var TimelineRangeSelect = React.createClass({
+        mixins: [
+            React.addons.PureRenderMixin,
+            PxDateMixin
+        ],
+        getInitialState: function () {
+            return {
+                newStart: null,
+                newEnd: null
+            };
+        },
+        render: function () {
+            if (!this.isMounted()) {
+                setTimeout(this.forceUpdate.bind(this), 0);
+                return h('div', {
+                    className: 'timeline-scale-zoom'
+                });
+            }
+            var zoom;
+            if (this.state.newStart) {
+                zoom = h('div', {
+                    className: 'timeline-scale-zoom-selection',
+                    style: (function () {
+                        var topPx = this.getPxForDate(this.state.newStart);
+                        var heightPx = this.getPxForDate(this.state.newEnd) - topPx;
+                        return {
+                            top: topPx,
+                            height: heightPx
+                        };
+                    }.call(this))
+                });
+            }
+            return h('div', {
+                    className: 'timeline-scale-zoom',
+                    onMouseDown: this.onMouseDown
+                },
+
+                !!this.state.newStart && zoom
+            );
+        },
+        onMouseDown: function (e) {
+            var startPos = e.clientY;
+            var MIN_ZOOM = 20;
+
+            var move = function (e) {
+                var newPos = e.clientY;
+                if (Math.abs(startPos - newPos) > MIN_ZOOM) {
+                    this.setState({
+                        newStart: this.getDateForPx(startPos > newPos ? newPos : startPos),
+                        newEnd: this.getDateForPx(startPos > newPos ? startPos : newPos)
+                    });
+                }
+            }.bind(this);
+
+            var end = function (e) {
+                document.body.removeEventListener('mouseup', end);
+                document.body.removeEventListener('mousemove', move);
+                document.body.classList.remove('noselect');
+                var endPos = e.clientY;
+                if (Math.abs(startPos - endPos) > MIN_ZOOM) {
+                    this.props.onZoom(this.state.newStart, this.state.newEnd);
+                }
+                this.setState({
+                    newStart: null,
+                    newEnd: null
+                });
+            }.bind(this);
+
+            document.body.addEventListener('mouseup', end);
+            document.body.addEventListener('mousemove', move);
+            document.body.classList.add('noselect');
         }
     });
 
@@ -178,6 +208,7 @@
                 }.bind(this))
                 .map(function (event) {
                     return h('div', {
+                        key: event.date + event.title,
                         className: 'event-title',
                         style: {
                             top: this.getPxForDate(event.date) - this.props.titleSize,
@@ -245,18 +276,6 @@
                     return 2;
                 }
                 return 1;
-            },
-            getPxForDate: function (sizePx, start, end, date) {
-                function get(date) {
-                    return (date - start) / (end - start) * sizePx;
-                }
-                return date ? get(date) : get;
-            },
-            getDateForPx: function (sizePx, start, end, px) {
-                function get(px) {
-                    return (px / sizePx) * (end - start) + start;
-                }
-                return px ? get(px) : get;
             }
         },
         getDefaultProps: function () {

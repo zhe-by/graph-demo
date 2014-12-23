@@ -75,19 +75,7 @@
             importance: Math.ceil(Math.random() * 100),
             date: moment([year]).unix()
         });
-        return year + (Math.ceil(Math.random() * 5));
+        return year + (Math.ceil(Math.random() * 4) + 1);
     }, 800);
 
-    zhe.graph.addFact('eventOnce', 'Тест', null, null, {
-        importance: 1,
-        date: moment([1455]).unix()
-    });
-    zhe.graph.addFact('eventOnce', 'Тест', null, null, {
-        importance: 1,
-        date: moment([1666]).unix()
-    });
-    zhe.graph.addFact('eventOnce', 'Тест', null, null, {
-        importance: 1,
-        date: moment([1888]).unix()
-    });
 }());
