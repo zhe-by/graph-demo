@@ -139,7 +139,14 @@ body {
     position: absolute;
     width: 100%;
     background-color: #000;
-    opacity: .3;
+    opacity: 0.1;
+    transition: opacity .1s;
+}
+.timeline-scroll-handler:hover {
+    opacity: 0.2;
+}
+.timeline-scroll-handler.is-dragging {
+    opacity: 0.3;
 }
 .timeline-scale-dates-container {
     height: 100%;
@@ -156,8 +163,9 @@ body {
     display: block;
     position: absolute;
     bottom: 0;
-    width: 50%;
-    border-bottom: 1px solid black;
+    height: 1px;
+    width: 60%;
+    background-color: #444;
 }
 .date-mark-text {
     position: absolute;

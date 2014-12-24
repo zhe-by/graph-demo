@@ -448,6 +448,11 @@ define(function (require) {
             start: t.number.isRequired,
             end: t.number.isRequired
         },
+        getInitialState: function () {
+            return {
+                isDragging: false
+            };
+        },
         render: function () {
             if (!this.isMounted()) {
                 setTimeout(this.forceUpdate.bind(this), 0);
@@ -460,7 +465,10 @@ define(function (require) {
                     onWheel: this.onWheel
                 },
                 h('div', {
-                    className: 'timeline-scroll-handler',
+                    className: cx({
+                        'timeline-scroll-handler': true,
+                        'is-dragging': this.state.isDragging
+                    }),
                     style: (function () {
                         var topPx = this.getPxForDate(this.props.startScroll);
                         var heightPx = this.getPxForDate(this.props.endScroll) - topPx;
@@ -481,6 +489,9 @@ define(function (require) {
             e.stopPropagation();
             var startPos = e.clientY;
             var MIN_MOVE = 3;
+            this.setState({
+                isDragging: true
+            });
 
             var move = function (e) {
                 var newPos = e.clientY;
@@ -494,10 +505,13 @@ define(function (require) {
             }.bind(this);
 
             var end = function (e) {
+                this.setState({
+                    isDragging: false
+                });
                 document.body.removeEventListener('mouseup', end);
                 document.body.removeEventListener('mousemove', move);
                 document.body.classList.remove('noselect');
-            };
+            }.bind(this);
 
             document.body.addEventListener('mouseup', end);
             document.body.addEventListener('mousemove', move);
