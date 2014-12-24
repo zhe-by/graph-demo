@@ -75,29 +75,6 @@ define(function (require) {
         edges.push(edge);
     }
 
-    function getEventsInRange(start, end) {
-        var onlyEvents = _.filter(facts, function (fact) {
-            if (fact.type === 'eventOnce') {
-                return start <= fact.date && fact.date <= end;
-            } else if (fact.type === 'eventLong') {
-                // todo
-            } else if (fact.type === 'eventApproximate') {
-                // todo
-            }
-        });
-        if (end - start > (moment([3000]).unix() - moment([0]).unix())) {
-            return _.filter(onlyEvents, function (event) {
-                return event.importance > 70;
-            });
-        }
-        if (end - start > (moment([1000]).unix() - moment([0]).unix())) {
-            return _.filter(onlyEvents, function (event) {
-                return event.importance > 50;
-            });
-        }
-        return onlyEvents;
-    }
-
     function getEvents() {
         return _.filter(facts, function (fact) {
             return fact.type === 'eventOnce';
@@ -107,7 +84,6 @@ define(function (require) {
     return {
         addFact: addFact,
         addEdge: addEdge,
-        getEventsInRange: getEventsInRange,
         getEvents: getEvents
     };
 });

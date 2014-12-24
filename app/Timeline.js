@@ -608,12 +608,12 @@ define(function (require) {
                         // todo
                     }
                 });
-                if (end - start > (moment([3000]).unix() - moment([0]).unix())) {
+                if (end - start > (moment([100]).unix() - moment([0]).unix())) {
                     return _.filter(onlyEvents, function (event) {
-                        return event.importance > 70;
+                        return event.importance > 80;
                     });
                 }
-                if (end - start > (moment([1000]).unix() - moment([0]).unix())) {
+                if (end - start > (moment([10]).unix() - moment([0]).unix())) {
                     return _.filter(onlyEvents, function (event) {
                         return event.importance > 50;
                     });
