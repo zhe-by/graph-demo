@@ -33,13 +33,13 @@ define(function (require) {
         'Старт космического корабля Союз ТМ-21'
     ];
 
-    _.reduce(_.times(5000), function (year, i) {
+    _.reduce(_.times(5000), function (date, i) {
         addFact('eventOnce', titles[Math.ceil(Math.random() * (titles.length - 1))], null, null, {
             importance: Math.ceil(Math.random() * 100),
-            date: moment([year]).unix()
+            date: date
         });
-        return year + (Math.ceil(Math.random() * 4) + 1);
-    }, 800);
+        return moment.unix(date).add((Math.ceil(Math.random() * 10) + 1), 'd').unix();
+    }, moment([1000]).unix());
 
     function addFact(type, title, description, wikiUrl, data) {
         var fact = {

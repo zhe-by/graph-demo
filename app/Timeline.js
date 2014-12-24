@@ -19,6 +19,109 @@ define(function (require) {
         }
     };
 
+    var TimelineScaleDates = React.createClass({
+        displayName: 'TimelineScaleDates',
+        statics: {
+            durations: [{
+                y: 500
+            }, {
+                y: 100
+            }, {
+                //     y: 50
+                // }, {
+                y: 10
+            }, {
+                //     y: 5
+                // }, {
+                y: 1
+            }, {
+                //     M: 4
+                // }, {
+                M: 1
+            }, {
+                //     d: 7
+                // }, {
+                d: 1
+            }, {
+                //     h: 4
+                // }, {
+                h: 1
+            }, {
+                //     m: 15
+                // }, {
+                m: 1
+            }],
+            durationTypes: [{
+                type: 'y',
+                format: 'YYYY'
+            }, {
+                type: 'M',
+                format: 'MMM'
+            }, {
+                type: 'd',
+                format: 'D'
+            }, {
+                type: 'h',
+                format: 'H'
+            }, {
+                type: 'm',
+                format: 'mm'
+            }]
+        },
+        mixins: [
+            React.addons.PureRenderMixin,
+            PxDateMixin
+        ],
+        propTypes: {
+            start: t.number.isRequired,
+            end: t.number.isRequired
+        },
+        render: function () {
+            if (!this.isMounted()) {
+                setTimeout(this.forceUpdate.bind(this), 0);
+                return h('div', {
+                    className: 'timeline-scale-dates-container'
+                });
+            }
+            var MARKS_MAX = 40;
+            var minMarkDelta = (this.props.end - this.props.start) / MARKS_MAX;
+            var duration = _.findLast(TimelineScaleDates.durations, function (duration) {
+                return moment.duration(duration).asSeconds() > minMarkDelta;
+            });
+            var durationDeltaUnits = _.values(duration)[0];
+            var durationType = _.keys(duration)[0];
+            var durationTypeIndex = _.findIndex(TimelineScaleDates.durationTypes, {
+                type: durationType
+            });
+            var startMoment = moment.unix(this.props.start);
+            // var markMoment = startMoment.clone().subtract(this.props.start % durationDeltaUnits, durationType).add(durationDeltaUnits, durationType);
+            var markMoment = startMoment.clone().startOf(durationType);
+            var marks = [];
+            while (markMoment.unix() < this.props.end) {
+                var durationFormat = TimelineScaleDates.durationTypes[durationTypeIndex].format;
+                var parentFormat = durationTypeIndex ? TimelineScaleDates.durationTypes[durationTypeIndex - 1].format : '';
+                var text = markMoment.format(parentFormat + ' ' + durationFormat);
+                var mark = h('div', {
+                        className: 'date-mark',
+                        style: {
+                            top: this.getPxForDate(markMoment.unix())
+                        }
+                    },
+                    h('span', {
+                            className: 'date-mark-text'
+                        },
+                        text
+                    )
+                );
+                marks.push(mark);
+                markMoment.add(durationDeltaUnits, durationType);
+            }
+            return h('div', {
+                className: 'timeline-scale-dates-container'
+            }, marks);
+        }
+    });
+
     var TimelineScale = React.createClass({
         displayName: 'TimelineScale',
         mixins: [
@@ -68,7 +171,13 @@ define(function (require) {
                     onWheel: this.onWheel,
                     onClick: this.onClick
                 },
-                h('div', null, lines),
+                h('div', {
+                    className: 'timeline-scale-lines'
+                }, lines),
+                h(TimelineScaleDates, {
+                    start: this.props.start,
+                    end: this.props.end
+                }),
                 h(TimelineRangeSelect, {
                     onBoundsChange: this.props.onBoundsChange,
                     start: this.props.start,
@@ -243,7 +352,7 @@ define(function (require) {
                         h('span', {
                                 className: 'event-title-text'
                             },
-                            event.title
+                            moment.unix(event.date).format('ll') + ' ' + event.title
                         )
                     );
                 }.bind(this))
@@ -519,7 +628,7 @@ define(function (require) {
         },
         getInitialState: function () {
             var start = moment([1000]).unix();
-            var end = moment([2000]).unix();
+            var end = moment([1100]).unix();
             return {
                 start: start,
                 end: end,
