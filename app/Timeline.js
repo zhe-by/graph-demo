@@ -27,28 +27,28 @@ define(function (require) {
             }, {
                 y: 100
             }, {
-                //     y: 50
-                // }, {
+                y: 50
+            }, {
                 y: 10
             }, {
-                //     y: 5
-                // }, {
+                y: 5
+            }, {
                 y: 1
             }, {
-                //     M: 4
-                // }, {
+                M: 4
+            }, {
                 M: 1
             }, {
-                //     d: 7
-                // }, {
+                d: 7
+            }, {
                 d: 1
             }, {
-                //     h: 4
-                // }, {
+                h: 4
+            }, {
                 h: 1
             }, {
-                //     m: 15
-                // }, {
+                m: 15
+            }, {
                 m: 1
             }],
             durationTypes: [{
@@ -94,8 +94,13 @@ define(function (require) {
                 type: durationType
             });
             var startMoment = moment.unix(this.props.start);
-            // var markMoment = startMoment.clone().subtract(this.props.start % durationDeltaUnits, durationType).add(durationDeltaUnits, durationType);
             var markMoment = startMoment.clone().startOf(durationType);
+            if (durationDeltaUnits !== 1) {
+                markMoment.set(
+                    durationType === 'd' ? 'D' : durationType,
+                    Math.ceil(markMoment.get(durationType === 'd' ? 'D' : durationType) / durationDeltaUnits) * durationDeltaUnits + (durationType === 'd' ? 1 : 0)
+                );
+            }
             var marks = [];
             while (markMoment.unix() < this.props.end) {
                 var durationFormat = TimelineScaleDates.durationTypes[durationTypeIndex].format;
