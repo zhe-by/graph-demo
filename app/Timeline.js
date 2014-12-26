@@ -354,10 +354,13 @@ define(function (require) {
                                 opacity: Timeline.getLineOpacityByImportance(event.importance)
                             }
                         },
-                        h('span', {
+                        h('div', {
                                 className: 'event-title-text'
                             },
-                            moment.unix(event.date).format('ll') + ' ' + event.title
+                            h('div', {
+                                className: 'event-title-date'
+                            }, moment.unix(event.date).format('ll')),
+                            ' ' + event.title
                         )
                     );
                 }.bind(this))
@@ -407,7 +410,9 @@ define(function (require) {
         ],
         propTypes: {
             event: t.object.isRequired,
-            titleSize: t.number.isRequired
+            titleSize: t.number.isRequired,
+            start: t.number.isRequired,
+            end: t.number.isRequired
         },
         render: function () {
             if (!this.isMounted()) {
@@ -416,20 +421,22 @@ define(function (require) {
                     className: 'event-over-container'
                 });
             }
-
+            var event = this.props.event;
             var titleOver = h('div', {
                     className: 'event-title event-over',
                     style: {
-                        top: this.getPxForDate(this.props.event.date) - this.props.titleSize,
-                        borderBottomWidth: Timeline.getLineHeightByImportance(this.props.event.importance),
-                        borderColor: Timeline.getEventColorByImportance(this.props.event.importance)
+                        top: this.getPxForDate(event.date) - this.props.titleSize,
+                        borderBottomWidth: Timeline.getLineHeightByImportance(event.importance),
+                        borderColor: Timeline.getEventColorByImportance(event.importance)
                     }
                 },
-                h('span', {
+                h('div', {
                         className: 'event-title-text'
                     },
-                    h('span', null, moment.unix(this.props.event.date).year()),
-                    h('span', null, ' ' + this.props.event.title)
+                    h('div', {
+                        className: 'event-title-date'
+                    }, moment.unix(event.date).format('ll')),
+                    ' ' + event.title
                 )
             );
 
