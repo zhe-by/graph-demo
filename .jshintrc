@@ -6,7 +6,8 @@
         "moment": true,
         "h": true,
         "t": true,
-        "cx": true
+        "cx": true,
+        "L": true
     },
     "bitwise": true,
     "camelcase": true,
