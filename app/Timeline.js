@@ -83,7 +83,7 @@ define(function (require) {
                     className: 'timeline-scale-dates-container'
                 });
             }
-            var MARKS_MAX = 40;
+            var MARKS_MAX = 28;
             var minMarkDelta = (this.props.end - this.props.start) / MARKS_MAX;
             var duration = _.findLast(TimelineScaleDates.durations, function (duration) {
                 return moment.duration(duration).asSeconds() > minMarkDelta;
